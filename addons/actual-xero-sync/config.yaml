@@ -11,7 +11,7 @@ arch:
   - i386
 init: false
 startup: services
-image: ghcr.io/home-assistant/{arch}-base:latest
+image: "ghcr.io/home-assistant/{arch}-base:latest"
 options:
   # Node.js Server Configuration (for Actual Budget API)
   nodejs_server_url: "http://localhost:3000"

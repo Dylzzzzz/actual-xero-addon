@@ -122,9 +122,15 @@ class ActualXeroSyncApp {
       logger.info('Initializing application services...');
       
       // Initialize API clients
-      // Use actual_budget_url but point it to Node.js server instead
-      const serverUrl = this.config.nodejs_server_url || 'http://localhost:3000';
+      // Use nodejs_server_url for HTTP-based integration
+      const serverUrl = this.config.nodejs_server_url || 'http://localhost:3001';
       const apiKey = this.config.nodejs_api_key || this.config.actual_budget_password; // Fallback to password field
+      
+      logger.info('ActualBudgetClient configuration:', { 
+        serverUrl, 
+        hasApiKey: !!apiKey,
+        configNodejsUrl: this.config.nodejs_server_url 
+      });
       
       this.services.actualClient = new ActualBudgetClient({
         serverUrl: serverUrl,

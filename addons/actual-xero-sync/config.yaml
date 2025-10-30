@@ -1,5 +1,5 @@
 name: Actual Budget Xero Sync
-version: "1.9.1"
+version: "1.9.2"
 slug: actual-xero-sync
 description: Sync business transactions from Actual Budget to Xero via Xano
 arch:
@@ -13,7 +13,7 @@ boot: auto
 init: false
 options:
   # Node.js Server Configuration (for Actual Budget API)
-  nodejs_server_url: "http://localhost:3000"
+  nodejs_server_url: "http://10.0.0.230:3001"
   nodejs_api_key: ""
   
   # Legacy Actual Budget Configuration (kept for compatibility)

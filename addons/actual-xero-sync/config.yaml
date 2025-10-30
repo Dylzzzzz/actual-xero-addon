@@ -1,5 +1,5 @@
 name: Actual Budget Xero Sync
-version: "1.9.0"
+version: "1.9.1"
 slug: actual-xero-sync
 description: Sync business transactions from Actual Budget to Xero via Xano
 arch:

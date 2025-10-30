@@ -1,8 +1,3 @@
 name: Actual Budget Xero Sync Add-on Repository
 url: https://github.com/Dylzzzzz/actual-xero-addon
 maintainer: Dylan Halliday
-addons:
-  actual-xero-sync:
-    name: Actual Budget Xero Sync
-    description: Sync business transactions from Actual Budget to Xero via Xano
-    version: 1.9.0

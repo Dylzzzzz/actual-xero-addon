@@ -1,27 +1,24 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Install Node.js and build tools
+# Install Node.js
 RUN apk add --no-cache nodejs npm python3 make g++
 
+# Set working directory
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --only=production && npm cache clean --force
+# Copy package files
+COPY package.json ./
+RUN npm install --production
 
-COPY src/ ./src/
-COPY web/ ./web/
-COPY config.yaml ./
-COPY run.sh ./
+# Copy source code
+COPY . .
 
-RUN mkdir -p /app/logs && \
-    chmod -R 755 /app && \
-    chmod +x run.sh
+# Make run script executable
+RUN chmod +x run.sh
 
-# Home Assistant add-ons need root access to read /data/options.json
+# Expose port
 EXPOSE 8080
-ENV NODE_ENV=production
-ENV LOG_LEVEL=info
-ENV PORT=8080
 
-CMD ["node", "src/app.js"]
+# Start the addon
+CMD ["./run.sh"]

@@ -1,10 +1,6 @@
-#!/bin/bash
-set -e
+#!/usr/bin/with-contenv bashio
 
-echo "Starting Actual-Xero Sync application..."
-
-# Change to app directory
+# Start the Node.js application
+bashio::log.info "Starting Actual Budget Xero Sync..."
 cd /app
-
-# Start the Node.js application (new integration system)
 exec node src/app.js

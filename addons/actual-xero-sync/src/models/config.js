@@ -205,10 +205,17 @@ class ConfigValidator {
    */
   static parseHomeAssistantOptions(options) {
     const config = {
+      // Node.js Server Configuration
+      nodejs_server_url: options.nodejs_server_url,
+      nodejs_api_key: options.nodejs_api_key,
+      
+      // Actual Budget Configuration  
       actual_budget_url: options.actual_budget_url,
       actual_budget_password: options.actual_budget_password,
       business_category_group_id: options.business_category_group_id || '',
       business_category_group_name: options.business_category_group_name,
+      
+      // Xano Configuration
       xano_api_url: options.xano_api_url,
       xano_api_key: options.xano_api_key,
       xano_rate_limit: parseInt(options.xano_rate_limit) || 18,
@@ -226,6 +233,8 @@ class ConfigValidator {
     
     // Debug: Log configuration values (without sensitive data)
     console.log('Parsed HA config:', {
+      nodejs_server_url: config.nodejs_server_url,
+      nodejs_api_key: config.nodejs_api_key ? `[${config.nodejs_api_key.length} chars]` : 'EMPTY',
       actual_budget_url: config.actual_budget_url,
       actual_budget_password: config.actual_budget_password ? `[${config.actual_budget_password.length} chars]` : 'EMPTY',
       business_category_group_name: config.business_category_group_name,

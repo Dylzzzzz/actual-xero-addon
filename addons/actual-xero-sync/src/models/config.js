@@ -29,6 +29,17 @@ class ConfigValidator {
         'any.required': 'Business category group name is required'
       }),
     
+    // Node.js Server Configuration (for HTTP-based Actual Budget integration)
+    nodejs_server_url: Joi.string().uri().optional().default('http://localhost:3001')
+      .messages({
+        'string.uri': 'Node.js server URL must be a valid URL'
+      }),
+    
+    nodejs_api_key: Joi.string().allow('').optional()
+      .messages({
+        'string.min': 'Node.js API key cannot be empty'
+      }),
+    
     // Xano Configuration
     xano_api_url: Joi.string().uri().required()
       .messages({

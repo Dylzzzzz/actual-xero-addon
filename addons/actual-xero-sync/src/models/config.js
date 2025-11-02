@@ -412,29 +412,7 @@ class ConfigValidator {
     };
   }
 
-  /**
-   * Parse Home Assistant options into config format
-   * @param {Object} options - Home Assistant add-on options
-   * @returns {Object} - Configuration object
-   */
-  static parseHomeAssistantOptions(options) {
-    return {
-      actual_budget_url: options.actual_budget_url,
-      actual_budget_password: options.actual_budget_password,
-      business_category_group_id: options.business_category_group_id || '',
-      business_category_group_name: options.business_category_group_name,
-      xano_api_url: options.xano_api_url,
-      xano_api_key: options.xano_api_key,
-      xano_rate_limit: options.xano_rate_limit || 18,
-      xero_client_id: options.xero_client_id,
-      xero_client_secret: options.xero_client_secret,
-      xero_tenant_id: options.xero_tenant_id,
-      sync_schedule: options.sync_schedule || '0 2 * * 1',
-      sync_days_back: options.sync_days_back || 7,
-      batch_size: options.batch_size || 10,
-      log_level: options.log_level || 'info'
-    };
-  }
+
 
   /**
    * Validate category group configuration

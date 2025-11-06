@@ -30,7 +30,18 @@ class ActualXeroSyncUI {
             triggerSync: document.getElementById('trigger-sync'),
             triggerReprocess: document.getElementById('trigger-reprocess'),
             refreshStatus: document.getElementById('refresh-status'),
-            clearLogs: document.getElementById('clear-logs')
+            clearLogs: document.getElementById('clear-logs'),
+            syncCategories: document.getElementById('sync-categories'),
+            syncPayees: document.getElementById('sync-payees'),
+            refreshMappings: document.getElementById('refresh-mappings')
+        };
+        
+        this.mappingElements = {
+            categoryStatus: document.getElementById('category-mapping-status'),
+            payeeStatus: document.getElementById('payee-mapping-status'),
+            progressContainer: document.getElementById('mapping-progress'),
+            progressFill: document.getElementById('mapping-progress-fill'),
+            progressText: document.getElementById('mapping-progress-text')
         };
         
         this.progressElements = {
@@ -56,6 +67,7 @@ class ActualXeroSyncUI {
         this.setupEventListeners();
         this.loadStatus();
         this.loadConfiguration();
+        this.loadMappingStatus();
         
         // Auto-refresh status every 15 seconds
         setInterval(() => this.loadStatus(), 15000);
@@ -73,6 +85,9 @@ class ActualXeroSyncUI {
         this.buttons.triggerReprocess.addEventListener('click', () => this.triggerReprocess());
         this.buttons.refreshStatus.addEventListener('click', () => this.loadStatus());
         this.buttons.clearLogs.addEventListener('click', () => this.clearLogs());
+        this.buttons.syncCategories.addEventListener('click', () => this.syncCategories());
+        this.buttons.syncPayees.addEventListener('click', () => this.syncPayees());
+        this.buttons.refreshMappings.addEventListener('click', () => this.loadMappingStatus());
         
         this.logFilter.addEventListener('change', (e) => {
             this.currentFilter = e.target.value;
@@ -489,6 +504,114 @@ class ActualXeroSyncUI {
             // Silently handle errors in background checks
             console.debug('Background status check failed:', error);
         }
+    }
+
+    // Mapping-related methods
+    async loadMappingStatus() {
+        try {
+            const response = await fetch('/api/mappings/status');
+            if (response.ok) {
+                const status = await response.json();
+                this.updateMappingStatus(status);
+            } else {
+                this.mappingElements.categoryStatus.textContent = 'Error loading status';
+                this.mappingElements.payeeStatus.textContent = 'Error loading status';
+            }
+        } catch (error) {
+            console.error('Failed to load mapping status:', error);
+            this.mappingElements.categoryStatus.textContent = 'Connection error';
+            this.mappingElements.payeeStatus.textContent = 'Connection error';
+        }
+    }
+
+    updateMappingStatus(status) {
+        if (status.success) {
+            const categoryText = `${status.categories.mapped}/${status.categories.total} mapped`;
+            const payeeText = `${status.payees.mapped}/${status.payees.total} mapped`;
+            
+            this.mappingElements.categoryStatus.textContent = categoryText;
+            this.mappingElements.payeeStatus.textContent = payeeText;
+            
+            // Add status classes for styling
+            this.mappingElements.categoryStatus.className = 'mapping-value ' + 
+                (status.categories.mapped === status.categories.total ? 'complete' : 'incomplete');
+            this.mappingElements.payeeStatus.className = 'mapping-value ' + 
+                (status.payees.mapped === status.payees.total ? 'complete' : 'incomplete');
+        } else {
+            this.mappingElements.categoryStatus.textContent = 'Error';
+            this.mappingElements.payeeStatus.textContent = 'Error';
+        }
+    }
+
+    async syncCategories() {
+        if (this.isSyncing || this.isReprocessing) return;
+        
+        try {
+            this.showMappingProgress('Syncing categories to Xano...');
+            this.updateButtonState(this.buttons.syncCategories, true, 'Syncing...');
+            
+            const response = await fetch('/api/sync/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.addLogEntry('success', `Categories synced: ${result.statistics.synced} synced, ${result.statistics.failed} failed`);
+                await this.loadMappingStatus(); // Refresh status
+            } else {
+                this.addLogEntry('error', `Failed to sync categories: ${result.error}`);
+            }
+            
+        } catch (error) {
+            console.error('Failed to sync categories:', error);
+            this.addLogEntry('error', 'Failed to sync categories: Connection error');
+        } finally {
+            this.hideMappingProgress();
+            this.updateButtonState(this.buttons.syncCategories, false, 'Sync Categories to Xano');
+        }
+    }
+
+    async syncPayees() {
+        if (this.isSyncing || this.isReprocessing) return;
+        
+        try {
+            this.showMappingProgress('Syncing payees to Xano...');
+            this.updateButtonState(this.buttons.syncPayees, true, 'Syncing...');
+            
+            const response = await fetch('/api/sync/payees', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.addLogEntry('success', `Payees synced: ${result.statistics.synced} synced, ${result.statistics.failed} failed`);
+                await this.loadMappingStatus(); // Refresh status
+            } else {
+                this.addLogEntry('error', `Failed to sync payees: ${result.error}`);
+            }
+            
+        } catch (error) {
+            console.error('Failed to sync payees:', error);
+            this.addLogEntry('error', 'Failed to sync payees: Connection error');
+        } finally {
+            this.hideMappingProgress();
+            this.updateButtonState(this.buttons.syncPayees, false, 'Sync Payees to Xano');
+        }
+    }
+
+    showMappingProgress(message) {
+        this.mappingElements.progressContainer.classList.remove('hidden');
+        this.mappingElements.progressText.textContent = message;
+        this.mappingElements.progressFill.style.width = '50%';
+    }
+
+    hideMappingProgress() {
+        this.mappingElements.progressContainer.classList.add('hidden');
+        this.mappingElements.progressFill.style.width = '0%';
     }
 }
 

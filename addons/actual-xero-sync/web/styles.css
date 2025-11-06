@@ -471,3 +471,134 @@ ync Statistics */
         align-items: stretch;
     }
 }
+/
+* Mapping Section Styles */
+.mapping-section {
+    grid-column: 1 / -1;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mapping-description {
+    color: #7f8c8d;
+    margin-bottom: 25px;
+    font-size: 1.05em;
+    line-height: 1.6;
+}
+
+.mapping-status h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.mapping-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.mapping-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+.mapping-label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.mapping-value {
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #ecf0f1;
+    color: #34495e;
+}
+
+.mapping-value.complete {
+    background: #d5f4e6;
+    color: #27ae60;
+}
+
+.mapping-value.incomplete {
+    background: #ffeaa7;
+    color: #e17055;
+}
+
+.mapping-actions h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.mapping-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.mapping-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+.mapping-info p {
+    margin-bottom: 8px;
+    color: #5a6c7d;
+}
+
+.mapping-info p:last-child {
+    margin-bottom: 0;
+}
+
+.mapping-info strong {
+    color: #2c3e50;
+}
+
+.mapping-progress {
+    margin-top: 20px;
+}
+
+.mapping-progress .progress-bar {
+    background: #ecf0f1;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 8px;
+    margin-bottom: 10px;
+}
+
+.mapping-progress .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #2980b9);
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.mapping-progress .progress-text {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    text-align: center;
+}
+
+/* Responsive mapping styles */
+@media (max-width: 767px) {
+    .mapping-buttons {
+        flex-direction: column;
+    }
+    
+    .mapping-stats {
+        grid-template-columns: 1fr;
+    }
+}

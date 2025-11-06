@@ -130,6 +130,58 @@
                 </div>
             </div>
 
+            <div class="mapping-section">
+                <h2>Mapping Setup</h2>
+                <p class="mapping-description">
+                    Before transactions can be synced to Xero, you need to map Actual Budget categories to Xero accounts 
+                    and payees to Xero contacts. This is a one-time setup process.
+                </p>
+                
+                <div class="mapping-status">
+                    <h3>Mapping Status</h3>
+                    <div id="mapping-stats" class="mapping-stats">
+                        <div class="mapping-stat">
+                            <span class="mapping-label">Categories:</span>
+                            <span id="category-mapping-status" class="mapping-value">Loading...</span>
+                        </div>
+                        <div class="mapping-stat">
+                            <span class="mapping-label">Payees:</span>
+                            <span id="payee-mapping-status" class="mapping-value">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mapping-actions">
+                    <h3>Setup Actions</h3>
+                    <div class="mapping-buttons">
+                        <button id="sync-categories" class="btn btn-secondary">
+                            <span class="btn-icon">📁</span>
+                            Sync Categories to Xano
+                        </button>
+                        <button id="sync-payees" class="btn btn-secondary">
+                            <span class="btn-icon">👥</span>
+                            Sync Payees to Xano
+                        </button>
+                        <button id="refresh-mappings" class="btn btn-secondary">
+                            <span class="btn-icon">↻</span>
+                            Refresh Mapping Status
+                        </button>
+                    </div>
+                    <div class="mapping-info">
+                        <p><strong>Step 1:</strong> Click "Sync Categories" and "Sync Payees" to populate Xano with your Actual Budget data.</p>
+                        <p><strong>Step 2:</strong> Go to your Xano workspace to map categories to Xero accounts and payees to Xero contacts.</p>
+                        <p><strong>Step 3:</strong> Once mappings are complete, transaction sync will work automatically.</p>
+                    </div>
+                </div>
+
+                <div class="mapping-progress hidden" id="mapping-progress">
+                    <div class="progress-bar">
+                        <div id="mapping-progress-fill" class="progress-fill"></div>
+                    </div>
+                    <div id="mapping-progress-text" class="progress-text">Processing...</div>
+                </div>
+            </div>
+
             <div class="logs-section">
                 <h2>Recent Activity</h2>
                 <div class="log-controls">

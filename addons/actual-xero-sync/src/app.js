@@ -531,6 +531,207 @@ class ActualXeroSyncApp {
       }
     });
 
+    // Categories and Payees endpoints for mapping setup
+    this.app.get('/api/actual/categories', async (req, res) => {
+      try {
+        logger.info('Fetching categories from Actual Budget');
+        const categories = await this.services.actualClient.getCategories(this.config.business_category_group_id);
+        
+        res.json({
+          success: true,
+          categories: categories.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            group_id: cat.cat_group || cat.group_id,
+            is_income: cat.is_income || false
+          })),
+          count: categories.length
+        });
+      } catch (error) {
+        logger.error('Failed to fetch categories:', error.message);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to fetch categories from Actual Budget'
+        });
+      }
+    });
+
+    this.app.get('/api/actual/payees', async (req, res) => {
+      try {
+        logger.info('Fetching payees from Actual Budget');
+        const payees = await this.services.actualClient.getPayees();
+        
+        res.json({
+          success: true,
+          payees: payees.map(payee => ({
+            id: payee.id,
+            name: payee.name,
+            transfer_acct: payee.transfer_acct || null
+          })),
+          count: payees.length
+        });
+      } catch (error) {
+        logger.error('Failed to fetch payees:', error.message);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to fetch payees from Actual Budget'
+        });
+      }
+    });
+
+    // Sync categories to Xano for mapping
+    this.app.post('/api/sync/categories', async (req, res) => {
+      try {
+        logger.info('Syncing categories to Xano for mapping setup');
+        
+        // Fetch categories from Actual Budget
+        const categories = await this.services.actualClient.getCategories(this.config.business_category_group_id);
+        
+        let synced = 0;
+        let failed = 0;
+        const errors = [];
+        
+        for (const category of categories) {
+          try {
+            const categoryData = {
+              actual_category_id: category.id,
+              actual_category_name: category.name,
+              actual_group_id: category.cat_group || category.group_id,
+              is_income: category.is_income || false,
+              xero_account_id: null, // To be mapped later
+              xero_account_code: null,
+              xero_account_name: null,
+              is_mapped: false,
+              created_at: new Date().toISOString()
+            };
+            
+            // Store in Xano categories table
+            await this.services.xanoClient.storeCategory(categoryData);
+            synced++;
+            
+          } catch (error) {
+            failed++;
+            errors.push({
+              category_id: category.id,
+              category_name: category.name,
+              error: error.message
+            });
+            logger.error(`Failed to sync category ${category.name}:`, error.message);
+          }
+        }
+        
+        logger.info(`Category sync completed: ${synced} synced, ${failed} failed`);
+        
+        res.json({
+          success: true,
+          message: `Synced ${synced} categories to Xano`,
+          statistics: {
+            total: categories.length,
+            synced,
+            failed,
+            errors
+          }
+        });
+        
+      } catch (error) {
+        logger.error('Failed to sync categories:', error.message);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to sync categories to Xano'
+        });
+      }
+    });
+
+    // Sync payees to Xano for mapping
+    this.app.post('/api/sync/payees', async (req, res) => {
+      try {
+        logger.info('Syncing payees to Xano for mapping setup');
+        
+        // Fetch payees from Actual Budget
+        const payees = await this.services.actualClient.getPayees();
+        
+        let synced = 0;
+        let failed = 0;
+        const errors = [];
+        
+        for (const payee of payees) {
+          try {
+            const payeeData = {
+              actual_payee_id: payee.id,
+              actual_payee_name: payee.name,
+              is_transfer_account: !!payee.transfer_acct,
+              xero_contact_id: null, // To be mapped later
+              xero_contact_name: null,
+              is_mapped: false,
+              created_at: new Date().toISOString()
+            };
+            
+            // Store in Xano payees table
+            await this.services.xanoClient.storePayee(payeeData);
+            synced++;
+            
+          } catch (error) {
+            failed++;
+            errors.push({
+              payee_id: payee.id,
+              payee_name: payee.name,
+              error: error.message
+            });
+            logger.error(`Failed to sync payee ${payee.name}:`, error.message);
+          }
+        }
+        
+        logger.info(`Payee sync completed: ${synced} synced, ${failed} failed`);
+        
+        res.json({
+          success: true,
+          message: `Synced ${synced} payees to Xano`,
+          statistics: {
+            total: payees.length,
+            synced,
+            failed,
+            errors
+          }
+        });
+        
+      } catch (error) {
+        logger.error('Failed to sync payees:', error.message);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to sync payees to Xano'
+        });
+      }
+    });
+
+    // Get mapping status
+    this.app.get('/api/mappings/status', async (req, res) => {
+      try {
+        // Get mapping statistics from Xano
+        const categoryStats = await this.services.xanoClient.getCategoryMappingStats();
+        const payeeStats = await this.services.xanoClient.getPayeeMappingStats();
+        
+        res.json({
+          success: true,
+          categories: {
+            total: categoryStats.total || 0,
+            mapped: categoryStats.mapped || 0,
+            unmapped: (categoryStats.total || 0) - (categoryStats.mapped || 0)
+          },
+          payees: {
+            total: payeeStats.total || 0,
+            mapped: payeeStats.mapped || 0,
+            unmapped: (payeeStats.total || 0) - (payeeStats.mapped || 0)
+          }
+        });
+      } catch (error) {
+        logger.error('Failed to get mapping status:', error.message);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to get mapping status'
+        });
+      }
+    });
+
     // Home Assistant integration endpoints
     this.app.get('/api/homeassistant/status', (req, res) => {
       try {

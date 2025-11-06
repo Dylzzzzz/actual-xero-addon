@@ -693,6 +693,90 @@ class XanoClient extends BaseApiClient {
   }
 
   /**
+   * Store category in Xano for mapping setup
+   * @param {Object} categoryData - Category data from Actual Budget
+   * @returns {Promise<Object>} - Stored category with Xano ID
+   */
+  async storeCategory(categoryData) {
+    try {
+      const result = await this.rateLimiter.makeRequest(async () => {
+        return await this.post('/categories', categoryData);
+      });
+
+      this.logger.debug(`Stored category: ${categoryData.actual_category_name}`);
+      return result.data;
+    } catch (error) {
+      if (error.statusCode === 409) {
+        // Category already exists - this is expected during sync
+        this.logger.debug(`Category already exists: ${categoryData.actual_category_name}`);
+        return { id: null, duplicate: true };
+      }
+      
+      this.logger.error(`Failed to store category ${categoryData.actual_category_name}: ${error.message}`);
+      throw this.createXanoError('CATEGORY_STORE_FAILED', error, { categoryData });
+    }
+  }
+
+  /**
+   * Store payee in Xano for mapping setup
+   * @param {Object} payeeData - Payee data from Actual Budget
+   * @returns {Promise<Object>} - Stored payee with Xano ID
+   */
+  async storePayee(payeeData) {
+    try {
+      const result = await this.rateLimiter.makeRequest(async () => {
+        return await this.post('/payees', payeeData);
+      });
+
+      this.logger.debug(`Stored payee: ${payeeData.actual_payee_name}`);
+      return result.data;
+    } catch (error) {
+      if (error.statusCode === 409) {
+        // Payee already exists - this is expected during sync
+        this.logger.debug(`Payee already exists: ${payeeData.actual_payee_name}`);
+        return { id: null, duplicate: true };
+      }
+      
+      this.logger.error(`Failed to store payee ${payeeData.actual_payee_name}: ${error.message}`);
+      throw this.createXanoError('PAYEE_STORE_FAILED', error, { payeeData });
+    }
+  }
+
+  /**
+   * Get category mapping statistics
+   * @returns {Promise<Object>} - Category mapping stats
+   */
+  async getCategoryMappingStats() {
+    try {
+      const result = await this.rateLimiter.makeRequest(async () => {
+        return await this.get('/categories/stats');
+      });
+
+      return result.data;
+    } catch (error) {
+      this.logger.error(`Failed to get category mapping stats: ${error.message}`);
+      throw this.createXanoError('CATEGORY_STATS_FAILED', error);
+    }
+  }
+
+  /**
+   * Get payee mapping statistics
+   * @returns {Promise<Object>} - Payee mapping stats
+   */
+  async getPayeeMappingStats() {
+    try {
+      const result = await this.rateLimiter.makeRequest(async () => {
+        return await this.get('/payees/stats');
+      });
+
+      return result.data;
+    } catch (error) {
+      this.logger.error(`Failed to get payee mapping stats: ${error.message}`);
+      throw this.createXanoError('PAYEE_STATS_FAILED', error);
+    }
+  }
+
+  /**
    * Create Xano-specific error with context
    * @param {string} code - Error code
    * @param {Error} originalError - Original error

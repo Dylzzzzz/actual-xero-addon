@@ -260,16 +260,33 @@ class SyncService {
   }
 
   /**
-   * Tag stored transactions in Actual Budget with #xano tag
+   * Tag stored transactions in Actual Budget with status tags
    * @param {Array} storedTransactions - Transactions that were stored in Xano
    */
   async tagStoredTransactions(storedTransactions) {
     try {
-      this.logger.debug(`Tagging ${storedTransactions.length} transactions with #xano tag`);
+      this.logger.debug(`Tagging ${storedTransactions.length} transactions with status tags`);
 
       for (const transaction of storedTransactions) {
         try {
-          await this.actualClient.addXanoTag(transaction.actual_transaction_id);
+          // Determine tags based on transaction status
+          let tags = '#xano';
+          
+          if (transaction.status === 'mapped') {
+            tags += ' #mapped';
+          } else if (transaction.status === 'imported') {
+            tags += ' #mapped #xero';
+          } else if (transaction.status === 'failed') {
+            tags += ' #failed';
+          }
+          
+          // Add Xano ID reference
+          if (transaction.id) {
+            tags += ` xano:${transaction.id}`;
+          }
+          
+          await this.actualClient.updateTransactionNotes(transaction.actual_transaction_id, tags);
+          this.logger.debug(`Tagged transaction ${transaction.actual_transaction_id} with: ${tags}`);
         } catch (error) {
           this.logger.warn(`Failed to tag transaction ${transaction.actual_transaction_id}: ${error.message}`);
           // Don't fail the entire sync for tagging errors

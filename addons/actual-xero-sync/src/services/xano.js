@@ -777,6 +777,30 @@ class XanoClient extends BaseApiClient {
   }
 
   /**
+   * Trigger Xero import workflow for mapped transactions
+   * @param {Object} options - Import options
+   * @param {number} options.limit - Maximum number of transactions to import
+   * @param {boolean} options.skipXeroImport - Skip Xero import step (for testing)
+   * @returns {Promise<Object>} - Import results
+   */
+  async triggerXeroImport(options = {}) {
+    try {
+      const result = await this.rateLimiter.makeRequest(async () => {
+        return await this.post('/workflow/sync-all', {
+          transaction_limit: options.limit || 50,
+          skip_xero_import: options.skipXeroImport || false
+        });
+      });
+
+      this.logger.info(`Xero import completed: ${result.data.statistics.transactions_imported} imported, ${result.data.statistics.transactions_failed} failed`);
+      return result.data;
+    } catch (error) {
+      this.logger.error(`Failed to trigger Xero import: ${error.message}`);
+      throw this.createXanoError('XERO_IMPORT_FAILED', error, { options });
+    }
+  }
+
+  /**
    * Create Xano-specific error with context
    * @param {string} code - Error code
    * @param {Error} originalError - Original error
